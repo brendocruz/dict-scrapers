@@ -20,6 +20,3 @@ class Scraper():
     def full_url(self) -> str:
         return self.url
 
-scraper = Scraper('http://www.google.com')
-scraper.load()
-print(scraper.extract())
