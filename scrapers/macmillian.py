@@ -35,27 +35,25 @@ class MacMillianDictScraper(Scraper):
 
     def extract(self):
         self.load()
-        self.source_page = Soup(self.raw().text, 'lxml')
-
         if self.is_error_page():
             return self.parse_error_page()
         return self.parse_word_page()
 
 
     def is_error_page(self) -> bool:
-        return bool(self.source_page.select('#search-results'))
+        return bool(self.html().select('#search-results'))
 
 
     def parse_word_page(self) -> list[DictEntry]:
         sanitized_entries = []
 
         # get main page entry
-        sanitized_main_entry = self.scrape_word_page(self.source_page)
+        sanitized_main_entry = self.scrape_word_page()
         sanitized_entries.append(sanitized_main_entry)
 
         # get related pages
         text_title = sanitized_main_entry.word
-        list_elm_related_links = self.source_page.select("#innerleftcol .related-entries-item a")
+        list_elm_related_links = self.html().select("#innerleftcol .related-entries-item a")
         if self.recursive:
             for elm_related_links in list_elm_related_links:
                 elm_related_word = elm_related_links.select('.BASE')
@@ -74,16 +72,16 @@ class MacMillianDictScraper(Scraper):
         return sanitized_entries
 
 
-    def scrape_word_page(self, source_page: Soup) -> DictEntry:
+    def scrape_word_page(self) -> DictEntry:
         """
         Receives a dict entry from MacMillian dictioanary
         Returns a DictEntry object
         """
         # get word of the page
-        sanitized_word = source_page.select('.big-title > .BASE')[0].get_text()
+        sanitized_word = self.html().select('.big-title > .BASE')[0].get_text()
 
         # get word phonetic pronunciation, if any
-        list_scraped_phonetics = source_page.select('div.PRONS')
+        list_scraped_phonetics = self.html().select('div.PRONS')
         list_sanitized_phonetics = []
         for scraped_phonetics in list_scraped_phonetics:
             # GET IPA SPELLING AND DIALECT (e.g. US, UK) [always true]
@@ -108,14 +106,14 @@ class MacMillianDictScraper(Scraper):
 
 
         # get word part of speech, if any
-        scraped_pos = source_page.select('.entry-labels > .PART-OF-SPEECH')
+        scraped_pos = self.html().select('.entry-labels > .PART-OF-SPEECH')
         list_sanitized_pos = []
         if scraped_pos:
             self._remove_zero_space(scraped_pos[0])
             list_sanitized_pos = scraped_pos[0].get_text().split(', ')
 
         # get word keywrods (e.g. TRANSITIVE, COUNTABLE, PLURAL ...)
-        elm_entry_labels = source_page.find(True, class_='entry-labels')
+        elm_entry_labels = self.html().find(True, class_='entry-labels')
         list_scraped_keywords = elm_entry_labels.find_all(True, class_=[
             'SYNTAX-CODING',
             'RESTRICTION-CLASS',
@@ -126,7 +124,7 @@ class MacMillianDictScraper(Scraper):
         sanitized_keywords = self.scrape_keywords(list_scraped_keywords)
 
         # get frequency info (red stars)
-        list_red_stars = source_page.select('.entry-red-star')
+        list_red_stars = self.html().select('.entry-red-star')
         text_frequency = ''
         if list_red_stars:
             text_num_stars = len(list_red_stars)
@@ -134,7 +132,7 @@ class MacMillianDictScraper(Scraper):
         
 
         # get dict entries
-        list_scraped_defns = source_page.select('.SENSE-BODY, .SUB-SENSE-BODY')
+        list_scraped_defns = self.html().select('.SENSE-BODY, .SUB-SENSE-BODY')
         list_sanitized_defns = self.scrape_defns(list_scraped_defns)
         
         return DictEntry(
@@ -283,12 +281,12 @@ class MacMillianDictScraper(Scraper):
         Returns an ErrorList object
         """
         # scrape the texts
-        text_title = self.source_page.select('#search-results h1')[0].get_text()
-        text_subtitle = self.source_page.select('.entry-bold')[0].get_text()
+        text_title = self.html().select('#search-results h1')[0].get_text()
+        text_subtitle = self.html().select('.entry-bold')[0].get_text()
 
         # scrape the list of words
         wordlist = []
-        list_elm_word = self.source_page.select('.display-list li')
+        list_elm_word = self.html().select('.display-list li')
         for elm_word in list_elm_word:
             wordlist.append(elm_word.get_text())
 
