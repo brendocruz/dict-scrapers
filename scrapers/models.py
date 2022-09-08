@@ -51,7 +51,7 @@ class DictEntry():
     word:      str                  = field(default_factory=str)
     pos:       list[str]            = field(default_factory=list) 
     phonetics: list[Phonetics]      = field(default_factory=list)
-    keywords:  list[Keywords]       = field(default_factory=list)
+    keywords:  Keywords             = field(default_factory=Keywords)
     defns:     list[WordDefinition] = field(default_factory=list)
     freq:      str                  = field(default_factory=str)
     source:    str                  = field(default_factory=str)

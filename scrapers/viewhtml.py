@@ -87,8 +87,9 @@ class WordDefinitionToHTML():
 
         # div.examples
         div_examples = soup.new_tag('div', **{'class': 'examples'})
-        converter_examples = ExampleGroupToHTML(self.word_definition.examples)
-        div_examples.append(converter_examples.convert())
+        for examples in self.word_definition.examples:
+            converter_examples = ExampleGroupToHTML(examples)
+            div_examples.append(converter_examples.convert())
         soup.div.append(div_examples)
 
         # div.sub-definitions
@@ -176,9 +177,8 @@ class DictEntryToHTML():
 
         # div.keywords
         div_keywords = root.new_tag('div', **{'class': 'keywords'})
-        for keywords in self.dict_entry.keywords:
-            converter = KeywordsToHTML(keywords)
-            div_keywords.append(converter.convert())
+        converter = KeywordsToHTML(self.dict_entry.keywords)
+        div_keywords.append(converter.convert())
         root.div.append(div_keywords)
         
         # div.defn

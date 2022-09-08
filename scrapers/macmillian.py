@@ -67,7 +67,7 @@ class MacMillianDictScraper(Scraper):
                         sanitized_data = MacMillianDictScraper(
                             slug=slug, dial=self.dial, recursive=False
                         ).extract()
-                        sanitized_entries.append(sanitized_data)
+                        sanitized_entries.extend(sanitized_data)
 
         return sanitized_entries
 
